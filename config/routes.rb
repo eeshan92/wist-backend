@@ -8,6 +8,7 @@ Rails.application.routes.draw do
   # api
   namespace :api, defaults: { format: 'json' } do
     namespace :v1 do
+      get 'users/me', to: 'users#me'
       resources :posts
     end
   end
