@@ -14,7 +14,6 @@ class Api::V1::PostsController < Api::V1::BaseController
   end
 
   def create
-    puts current_user
     @post = current_user.posts.build(post_params)
 
     if @post.save
