@@ -14,6 +14,10 @@ class Api::V1::PostsController < Api::V1::BaseController
   end
 
   def create
+    @location = Location.where(lat: params[:lat], lng: params[:lng])
+    unless @location.present?
+      Location.create({lat: params[:lat], lng: params[:lng]})
+    end
     @post = current_user.posts.build(post_params)
 
     if @post.save
@@ -47,6 +51,6 @@ class Api::V1::PostsController < Api::V1::BaseController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def post_params
-      params.require(:post).permit(:body)
+      params.require(:post).permit(:body, :lat, :lng)
     end
 end
