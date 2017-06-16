@@ -3,7 +3,6 @@ class Api::V1::UsersController < Api::V1::BaseController
 
   def me
     @user = User.where(email: params[:email]).try(:first)
-
     if @user && @user.valid_password?(params[:password])
       render json: { token: @user.authentication_token, email: @user.email, username: @user.username }, status: :ok
     else
