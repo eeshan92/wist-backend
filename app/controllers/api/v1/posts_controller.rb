@@ -9,9 +9,9 @@ class Api::V1::PostsController < Api::V1::BaseController
     render json: {
                     posts: @posts,
                     pagination: {
-                      page: page.to_i,
+                      page: @posts.current_page,
                       per_page: page_size.to_i,
-                      total: @posts.count
+                      total: @posts.total_pages
                     } 
                   }, status: :ok
   end
