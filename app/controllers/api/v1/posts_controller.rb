@@ -2,9 +2,20 @@ class Api::V1::PostsController < Api::V1::BaseController
   before_action :set_post, only: [:show, :edit, :update, :destroy]
 
   def index
-    @posts = Post.all
+    render json: { errors: "'#{page}' is an invalid page" }, status: :unprocessable_entity
+    return
+    @posts = Post.includes(:user, :location).
+                  order("created_at desc").
+                  paginate(page: page, per_page: page_size)
 
-    render json: { posts: @posts }.to_json, status: :ok
+    render json: {
+                    posts: @posts,
+                    pagination: {
+                      page: page,
+                      per_page: page_size,
+                      total: @posts.count
+                    } 
+                  }, status: :ok
   end
 
   def show
@@ -14,11 +25,17 @@ class Api::V1::PostsController < Api::V1::BaseController
   end
 
   def create
-    @location = Location.where(lat: params[:lat], lng: params[:lng])
-    unless @location.present?
-      Location.create({lat: params[:lat], lng: params[:lng]})
-    end
     @post = current_user.posts.build(post_params)
+    if params[:lat].present? && params[:lng].present?
+      lat = to_decimal(params[:lat])
+      lng = to_decimal(params[:lng])
+      @location = Location.where(lat: lat, lng: lng).first
+
+      unless @location.present?
+        @location = Location.create({lat: lat, lng: lng})
+      end
+       @post.location = @location
+    end
 
     if @post.save
       render json: { id: @post.id }, status: :ok
@@ -51,6 +68,18 @@ class Api::V1::PostsController < Api::V1::BaseController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def post_params
-      params.require(:post).permit(:body, :lat, :lng)
+      params.require(:post).permit(:body, :lat, :lng, :per_page, :page)
+    end
+
+    def to_decimal(float)
+      float.to_d.round(5)
+    end
+
+    def page_size
+      params[:per_page] || 20
+    end
+
+    def page
+      params[:page] || 1
     end
 end
