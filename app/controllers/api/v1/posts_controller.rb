@@ -6,12 +6,15 @@ class Api::V1::PostsController < Api::V1::BaseController
                   order("created_at desc").
                   paginate(page: page, per_page: page_size)
 
+    total = @posts.total_pages
+    current = @posts.current_page
+
     render json: {
                     posts: @posts,
                     pagination: {
-                      page: @posts.current_page,
+                      page: [current, max].min,
                       per_page: page_size.to_i,
-                      total: @posts.total_pages
+                      total: total
                     } 
                   }, status: :ok
   end
