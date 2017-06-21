@@ -2,10 +2,6 @@ class Api::V1::PostsController < Api::V1::BaseController
   before_action :set_post, only: [:show, :edit, :update, :destroy]
 
   def index
-    unless page.is_a?(Integer) || page <= 0
-      render json: { errors: "'#{page}' is an invalid page" }, status: :unprocessable_entity
-      return
-    end
     @posts = Post.includes(:user, :location).
                   order("created_at desc").
                   paginate(page: page, per_page: page_size)
