@@ -12,7 +12,7 @@ class Api::V1::PostsController < Api::V1::BaseController
     render json: {
                     posts: @posts,
                     pagination: {
-                      page: [current, max].min,
+                      page: [current, total].min,
                       per_page: page_size.to_i,
                       total: total
                     } 
