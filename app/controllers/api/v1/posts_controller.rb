@@ -2,12 +2,21 @@ class Api::V1::PostsController < Api::V1::BaseController
   before_action :set_post, only: [:show, :edit, :update, :destroy]
 
   def index
+    before, after = params[:before], params[:after]
+    query = if before.present?
+              "ID < #{before}"
+            elsif after.present?
+              "ID > #{after}"
+            else
+              "ID > 1"
+            end
+
     @posts = Post.includes(:user, :location).
                   order("created_at desc").
+                  where(query).
                   paginate(page: page, per_page: page_size)
 
-    total = @posts.total_pages
-    current = @posts.current_page
+    total, current = @posts.total_pages, @posts.current_page
 
     render json: {
                     posts: @posts,
@@ -69,7 +78,7 @@ class Api::V1::PostsController < Api::V1::BaseController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def post_params
-      params.require(:post).permit(:body, :lat, :lng, :per_page, :page)
+      params.require(:post).permit(:body, :lat, :lng, :per_page, :page, :before, :after)
     end
 
     def to_decimal(float)
