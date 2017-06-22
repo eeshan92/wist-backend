@@ -8,7 +8,7 @@ class Api::V1::PostsController < Api::V1::BaseController
             elsif after.present?
               "ID > #{after}"
             else
-              "ID > 1"
+              ""
             end
 
     @posts = Post.includes(:user, :location).
