@@ -11,6 +11,7 @@ Rails.application.routes.draw do
     namespace :v1 do
       post 'users/me', to: 'users#me'
       resources :posts
+      resources :tracks
     end
   end
 end
