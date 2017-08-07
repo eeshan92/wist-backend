@@ -43,10 +43,14 @@ function initMap() {
     var _marker = new google.maps.Marker({
       position: { lat: track['location']['lat'] * 1, lng: track['location']['lng'] * 1 },
       map: map,
-      opacity: 0.5,
-      title: track["created_at"]
+      opacity: 0.25,
+      title: track["created_at"],
+      label: track["id"] + " [" + track["location"]["lat"] + "," + track["location"]["lng"] + "]"
     });
     markers.push(_marker);
+    _marker.addListener("click", function() {
+      console.log(_marker.getLabel() + "\n" + _marker.getTitle());
+    });
   };
 
   // Set Opacity to 1.0 when time line matches track
@@ -66,7 +70,7 @@ function initMap() {
   };
 
   function unemphasizeMarker(now_marker) {
-    now_marker.setOpacity(0.5);
+    now_marker.setOpacity(0.25);
   };
 
   // // Limit zoom on map view
