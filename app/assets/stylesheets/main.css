@@ -6,6 +6,10 @@
   float: right;
 }
 
+#notice {
+  margin: 0px;
+}
+
 output {
   position: absolute;
   background: #444444;

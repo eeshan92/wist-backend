@@ -13,22 +13,27 @@
 
 <br>
 
-<div>
-  Showing current date:
-  <%= text_field :track, :date, "data-provide" => 'datepicker', "class" => 'datepicker', "value" => @current_date  %>
-  <%= link_to "Change", root_path %>
+<div class="container_fluid">
+  <div class="row">
+    <div class="col-lg-4">
+      Showing current date:
+      <%= text_field :track, :date, "data-provide" => 'datepicker', "class" => 'datepicker', "value" => @current_date  %>
+      <%= link_to "Change", root_path %>
+    </div>
+    <div class="col-lg-8">
+      <form class="row range">
+        <input
+          id="track_time_range"
+          type="range"
+          min="0"
+          max="1440"
+          step="1"
+          name="time" />
+        <output for="time" onforminput="value = time.valueAsNumber;"></output>
+      </form>
+    </div>
+  </div>
 </div>
-
-<form class="row range">
-  <input
-    id="track_time_range"
-    type="range"
-    min="0"
-    max="1440"
-    step="1"
-    name="time" />
-  <output for="time" onforminput="value = time.valueAsNumber;"></output>
-</form>
 
 <div id="log-out">
   <%= link_to "Log out", destroy_user_session_path, :method => :delete %>  
