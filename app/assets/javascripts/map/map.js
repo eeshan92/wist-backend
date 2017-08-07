@@ -45,7 +45,7 @@ function initMap() {
       map: map,
       opacity: 0.25,
       title: track["created_at"],
-      label: track["user_id"]
+      label: track["user_id"] + ""
     });
     markers.push(_marker);
     _marker.addListener("click", function() {
