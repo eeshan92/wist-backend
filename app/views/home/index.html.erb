@@ -16,17 +16,19 @@
 <div>
   Showing current date:
   <%= text_field :track, :date, "data-provide" => 'datepicker', "class" => 'datepicker', "value" => @current_date  %>
+  <%= link_to "Change", root_path %>
 </div>
 
-<div class="row">
+<form class="row range">
   <input
     id="track_time_range"
     type="range"
     min="0"
     max="1440"
     step="1"
-    data-buffer="60" />
-</div>
+    name="time" />
+  <output for="time" onforminput="value = time.valueAsNumber;"></output>
+</form>
 
 <div id="log-out">
   <%= link_to "Log out", destroy_user_session_path, :method => :delete %>  
