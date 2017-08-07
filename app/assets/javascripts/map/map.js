@@ -47,15 +47,6 @@ function initMap() {
       title: track["created_at"]
     });
     markers.push(_marker);
-    _marker.addListener('click', function () {
-      emphasizeMarker(this);
-      // geocodeLocation(_marker.getPosition(), function (result) {
-      //   if (result) {
-      //     setLocationData(_marker.getTitle(), result)
-      //     openInfoWindow(_marker);
-      //   }
-      // });
-    });
   };
 
   // Set Opacity to 1.0 when time line matches track
@@ -63,7 +54,6 @@ function initMap() {
     var time = new Date(today + (this.value * 60000));
     _.each(markers, function (marker_track) {
       var created = new Date(marker_track.getTitle());
-      console.log((created - time)/60000);
       if (Math.abs((created - time)/60000) <= 20.0) 
         emphasizeMarker(marker_track);
       else
