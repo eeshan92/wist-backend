@@ -1,7 +1,9 @@
 function initMap() {
   var minZoom = 12,
       sgCenter = { lat: 1.360270, lng: 103.815959 },
-      tracks = gon.tracks;
+      tracks = gon.tracks,
+      today = new Date().setHours(0,0,0,0),
+      markers = [];
 
   // var infoWindow = new google.maps.InfoWindow();
   // var geocoder = new google.maps.Geocoder();
@@ -14,9 +16,12 @@ function initMap() {
     streetViewControl: false
   });
 
-  // // Traffic layer over map
+  // Traffic and Transit layer over map
   // var trafficLayer = new google.maps.TrafficLayer();
   // trafficLayer.setMap(map);
+
+  var transitLayer = new google.maps.TransitLayer();
+  transitLayer.setMap(map);
 
   // Marker to be assigned
   var marker = new google.maps.Marker({
@@ -38,8 +43,10 @@ function initMap() {
     var _marker = new google.maps.Marker({
       position: { lat: track['location']['lat'] * 1, lng: track['location']['lng'] * 1 },
       map: map,
-      opacity: 0.5
+      opacity: 0.5,
+      title: track["created_at"]
     });
+    markers.push(_marker);
     _marker.addListener('click', function () {
       emphasizeMarker(this);
       // geocodeLocation(_marker.getPosition(), function (result) {
@@ -53,11 +60,23 @@ function initMap() {
 
   // Set Opacity to 1.0 when time line matches track
   $("#track_time_range").change(function() {
-    console.log(this.value);
+    var time = new Date(today + (this.value * 60000));
+    _.each(markers, function (marker_track) {
+      var created = new Date(marker_track.getTitle());
+      console.log((created - time)/60000);
+      if (Math.abs((created - time)/60000) <= 20.0) 
+        emphasizeMarker(marker_track);
+      else
+        unemphasizeMarker(marker_track);
+    });
   });
 
   function emphasizeMarker(now_marker) {
     now_marker.setOpacity(1.0);
+  };
+
+  function unemphasizeMarker(now_marker) {
+    now_marker.setOpacity(0.5);
   };
 
   // // Limit zoom on map view
