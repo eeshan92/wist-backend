@@ -1,0 +1,26 @@
+{
+  "name": "wist-backend",
+  "version": "1.0.0",
+  "description": "NUS FYP",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "rangeslider-pure": "^0.4.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eeshan92/wist-backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/eeshan92/wist-backend/issues"
+  },
+  "homepage": "https://github.com/eeshan92/wist-backend#readme"
+}
