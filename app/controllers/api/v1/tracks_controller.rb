@@ -1,5 +1,10 @@
 class Api::V1::TracksController < Api::V1::BaseController
 
+  def index
+    @tracks = Track.order("created_at desc").
+                    paginate(page: page, per_page: page_size)
+  end
+
   def create
     @track = current_user.tracks.build({})
     if params[:lat].present? && params[:lng].present?
