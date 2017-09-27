@@ -36,6 +36,7 @@
 </div>
 
 <div id="log-out">
-  <%= link_to "Log out", destroy_user_session_path, :method => :delete %>  
+  <%= link_to "Log out", destroy_user_session_path, :method => :delete %>
+  | <%= link_to "Download CSV", root_path(format: "csv"), :class => "btn btn-primary btn-sm" %>
 </div>
 
