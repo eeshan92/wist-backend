@@ -67,6 +67,7 @@ class HomeController < ApplicationController
             track["lng"],
             track["time"],
             track["distance"],
+            track["speed"],
             track["time_diff"],
             track["user"]
           ]
