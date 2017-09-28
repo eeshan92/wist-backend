@@ -6,7 +6,7 @@ class Api::V1::TracksController < Api::V1::BaseController
   end
 
   def create
-    @track = current_user.tracks.build({"track_time" => (params[:track_time] || Time.now)})
+    @track = current_user.tracks.build({"track_time" => (params[:track_time] || Time.now).to_time.in_time_zone("Singapore")})
     if params[:lat].present? && params[:lng].present?
       lat = to_decimal(params[:lat])
       lng = to_decimal(params[:lng])
