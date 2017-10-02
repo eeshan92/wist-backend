@@ -2,16 +2,17 @@ require 'csv'
 
 class HomeController < ApplicationController
   def index
-     @posts = Post.includes(:user, :location).order("created_at DESC").paginate(page: params[:page])
+    @posts = Post.includes(:user, :location).order("created_at DESC").paginate(page: params[:page])
 
-     track_day = (params[:date] || Time.now.in_time_zone("Singapore")).to_date
-     @current_date = track_day
-     @tracks = Track.includes(:location).
-               where("DATE(created_at AT TIME ZONE 'UTC' AT TIME ZONE ?) = ?",
-                 Time.now.in_time_zone("Singapore").strftime("%Z"), track_day)
-     gon.watch.tracks = @tracks.as_json(include: [:location])
+    track_day = (params[:date] || Time.now.in_time_zone("Singapore")).to_date
+    @current_date = track_day
+    @tracks = Track.includes(:location).
+              where("DATE(created_at AT TIME ZONE 'UTC' AT TIME ZONE ?) = ?",
+                Time.now.in_time_zone("Singapore").strftime("%Z"), track_day)
+    @tracks = @tracks.where(user_id: params[:id]) if params[:id].present?
+    gon.watch.tracks = @tracks.as_json(include: [:location])
 
-     respond_to do |format|
+    respond_to do |format|
       format.html
       format.csv { send_file download_tracks }
     end
