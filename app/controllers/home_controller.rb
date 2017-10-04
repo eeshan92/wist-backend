@@ -21,85 +21,85 @@ class HomeController < ApplicationController
 
   private
 
-  def process_tracks
-    data = Track.includes(:user, :location)
-    data = data.where("created_at >= '#{params[:from]}'") if params[:from].present?
+    def process_tracks
+      data = Track.includes(:user, :location)
+      data = data.where("created_at >= '#{params[:from]}'") if params[:from].present?
 
-    data = data.group_by { |t| t.user.username }.
-      map do |user,tracks|
-        {
-          user => tracks.map do |track|
-            {
-              "id" => track.id,
-              "lat" => track.location.lat,
-              "lng" => track.location.lng,
-              "time" => track.track_time || track.created_at,
-              "distance" => nil, # metres
-              "speed" => nil, # m/s
-              "time_diff" => nil, # seconds
-              "user" => user.to_s
-            }
+      data = data.group_by { |t| t.user.username }.
+        map do |user,tracks|
+          {
+            user => tracks.map do |track|
+              {
+                "id" => track.id,
+                "lat" => track.location.lat,
+                "lng" => track.location.lng,
+                "time" => track.track_time || track.created_at,
+                "distance" => nil, # metres
+                "speed" => nil, # m/s
+                "time_diff" => nil, # seconds
+                "user" => user.to_s
+              }
+            end
+          }
+        end.inject(:merge)
+
+      processed = []
+      (data || {}).map do |user, tracks|
+        tracks.each_with_index do |track, index|
+          if index > 0
+            distance = calc_distance(track, tracks[index - 1])
+            time_diff = track["time"] - tracks[index - 1]["time"]
+            track["time_diff"] = time_diff
+            track["speed"] = (time_diff == 0 ? 0 : distance/time_diff)
+            track["distance"] = distance
+            processed << track
           end
-        }
-      end.inject(:merge)
-
-    processed = []
-    (data || {}).map do |user, tracks|
-      tracks.each_with_index do |track, index|
-        if index > 0
-          distance = calc_distance(track, tracks[index - 1])
-          time_diff = track["time"] - tracks[index - 1]["time"]
-          track["time_diff"] = time_diff
-          track["speed"] = (time_diff == 0 ? 0 : distance/time_diff)
-          track["distance"] = distance
-          processed << track
         end
       end
-    end
-    processed
-  end
-
-  def form_csv(processed_tracks)
-    now = Time.now
-    path = File.join(Rails.root, "tracks", "report_ending_#{now}.csv")
-    File.delete(path) if File.exist?(path)
-
-    CSV.open(path, "w") do |csv|
-      csv << ["id", "lat", "lng", "time", "distance", "speed", "time_diff", "user"]
-      processed_tracks.each_with_index.
-        reject { |t, index| (index > 0 && t["speed"] > 25.0) }.
-        pluck(0).
-        each do |track|
-          csv << [
-            track["id"],
-            track["lat"].to_s,
-            track["lng"],
-            track["time"],
-            track["distance"],
-            track["speed"],
-            track["time_diff"],
-            track["user"]
-          ]
-        end
+      processed
     end
 
-    File.join(Rails.root, "tracks", "report_ending_#{now}.csv")
-  end
+    def form_csv(processed_tracks)
+      now = Time.now
+      path = File.join(Rails.root, "tracks", "report_ending_#{now}.csv")
+      File.delete(path) if File.exist?(path)
 
-  def calc_distance loc1, loc2
-    rad_per_deg = Math::PI/180  # PI / 180
-    rkm = 6371                  # Earth radius in kilometers
-    rm = rkm * 1000             # Radius in meters
+      CSV.open(path, "w") do |csv|
+        csv << ["id", "lat", "lng", "time", "distance", "speed", "time_diff", "user"]
+        processed_tracks.each_with_index.
+          reject { |t, index| (index > 0 && t["speed"] > 25.0) }.
+          pluck(0).
+          each do |track|
+            csv << [
+              track["id"],
+              track["lat"].to_s,
+              track["lng"],
+              track["time"],
+              track["distance"],
+              track["speed"],
+              track["time_diff"],
+              track["user"]
+            ]
+          end
+      end
 
-    dlat_rad = (loc2["lat"]-loc1["lat"]) * rad_per_deg  # Delta, converted to rad
-    dlon_rad = (loc2["lng"]-loc1["lng"]) * rad_per_deg
+      File.join(Rails.root, "tracks", "report_ending_#{now}.csv")
+    end
 
-    lat1_rad, lon1_rad = [loc1["lat"] * rad_per_deg, loc1["lng"] * rad_per_deg]
-    lat2_rad, lon2_rad = [loc2["lat"] * rad_per_deg, loc2["lng"] * rad_per_deg]
+    def calc_distance loc1, loc2
+      rad_per_deg = Math::PI/180  # PI / 180
+      rkm = 6371                  # Earth radius in kilometers
+      rm = rkm * 1000             # Radius in meters
 
-    a = Math.sin(dlat_rad/2)**2 + Math.cos(lat1_rad) * Math.cos(lat2_rad) * Math.sin(dlon_rad/2)**2
-    c = 2 * Math::atan2(Math::sqrt(a), Math::sqrt(1-a))
+      dlat_rad = (loc2["lat"]-loc1["lat"]) * rad_per_deg  # Delta, converted to rad
+      dlon_rad = (loc2["lng"]-loc1["lng"]) * rad_per_deg
 
-    rm * c # Delta in metres
-  end
+      lat1_rad, lon1_rad = [loc1["lat"] * rad_per_deg, loc1["lng"] * rad_per_deg]
+      lat2_rad, lon2_rad = [loc2["lat"] * rad_per_deg, loc2["lng"] * rad_per_deg]
+
+      a = Math.sin(dlat_rad/2)**2 + Math.cos(lat1_rad) * Math.cos(lat2_rad) * Math.sin(dlon_rad/2)**2
+      c = 2 * Math::atan2(Math::sqrt(a), Math::sqrt(1-a))
+
+      rm * c # Delta in metres
+    end
 end
