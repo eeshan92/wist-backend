@@ -1,8 +1,8 @@
 class Api::V1::TracksController < Api::V1::BaseController
 
   def index
-    @tracks = Track.order("created_at desc").
-                    paginate(page: page, per_page: page_size)
+    render json: @tracks = Track.order("created_at desc").
+                             paginate(page: params[:page] || 1)
   end
 
   def json
