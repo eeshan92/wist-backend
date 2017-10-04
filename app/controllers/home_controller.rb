@@ -14,23 +14,23 @@ class HomeController < ApplicationController
 
     respond_to do |format|
       format.html
-      format.csv { send_file download_tracks }
+      format.csv { send_file(form_csv(process_tracks)) }
+      format.json { render json: process_tracks }
     end
   end
 
   private
 
-  def download_tracks
-    now = Time.now
-    path = File.join(Rails.root, "tracks", "report_ending_#{now}.csv")
-    File.delete(path) if File.exist?(path)
+  def process_tracks
+    data = Track.includes(:user, :location)
+    data = data.where("created_at >= '#{params[:from]}'") if params[:from].present?
 
-    data = Track.includes(:user, :location).
-      group_by { |t| t.user.username }.
+    data = data.group_by { |t| t.user.username }.
       map do |user,tracks|
         {
           user => tracks.map do |track|
             {
+              "id" => track.id,
               "lat" => track.location.lat,
               "lng" => track.location.lng,
               "time" => track.track_time || track.created_at,
@@ -44,26 +44,34 @@ class HomeController < ApplicationController
       end.inject(:merge)
 
     processed = []
-    data.map do |user, tracks|
+    (data || {}).map do |user, tracks|
       tracks.each_with_index do |track, index|
         if index > 0
           distance = calc_distance(track, tracks[index - 1])
           time_diff = track["time"] - tracks[index - 1]["time"]
           track["time_diff"] = time_diff
-          track["speed"] = distance/time_diff
+          track["speed"] = (time_diff == 0 ? 0 : distance/time_diff)
           track["distance"] = distance
           processed << track
         end
       end
     end
+    processed
+  end
+
+  def form_csv(processed_tracks)
+    now = Time.now
+    path = File.join(Rails.root, "tracks", "report_ending_#{now}.csv")
+    File.delete(path) if File.exist?(path)
 
     CSV.open(path, "w") do |csv|
-      csv << ["lat", "lng", "time", "distance", "speed", "time_diff", "user"]
-      processed.each_with_index.
+      csv << ["id", "lat", "lng", "time", "distance", "speed", "time_diff", "user"]
+      processed_tracks.each_with_index.
         reject { |t, index| (index > 0 && t["speed"] > 25.0) }.
         pluck(0).
         each do |track|
           csv << [
+            track["id"],
             track["lat"].to_s,
             track["lng"],
             track["time"],
