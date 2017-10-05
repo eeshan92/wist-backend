@@ -49,10 +49,12 @@ class HomeController < ApplicationController
           if index > 0
             distance = calc_distance(track, tracks[index - 1])
             time_diff = track["time"] - tracks[index - 1]["time"]
+            speed = (time_diff == 0 ? 999 : distance/time_diff)
+
             track["time_diff"] = time_diff
-            track["speed"] = (time_diff == 0 ? 0 : distance/time_diff)
+            track["speed"] = speed
             track["distance"] = distance
-            processed << track
+            processed << track if (time_diff < 7200 && speed < 40)
           end
         end
       end
