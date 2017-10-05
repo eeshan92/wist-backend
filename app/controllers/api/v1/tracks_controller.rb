@@ -10,7 +10,7 @@ class Api::V1::TracksController < Api::V1::BaseController
   end
 
   def create
-    @track = current_user.tracks.build({"track_time" => (params[:track_time] || Time.now).to_time.in_time_zone("Singapore")})
+    @track = current_user.tracks.build({"track_time" => (params[:track_time] || Time.now).to_time})
     if params[:lat].present? && params[:lng].present?
       lat = to_decimal(params[:lat])
       lng = to_decimal(params[:lng])
@@ -63,18 +63,20 @@ class Api::V1::TracksController < Api::V1::BaseController
 
       processed = []
       (data || {}).map do |user, tracks|
-        tracks.each_with_index do |track, index|
-          if index > 0
-            distance = calc_distance(track, tracks[index - 1])
-            time_diff = track["time"] - tracks[index - 1]["time"]
-            speed = (time_diff == 0 ? 999 : distance/time_diff)
+        tracks = tracks.sort { |a,b| a['id'] <=> b['id'] }
+        tracks.
+          each_with_index do |track, index|
+            if index > 0
+              distance = calc_distance(track, tracks[index - 1])
+              time_diff = track["time"] - tracks[index - 1]["time"]
+              speed = (time_diff == 0 ? 999 : distance/time_diff)
 
-            track["time_diff"] = time_diff
-            track["speed"] = speed
-            track["distance"] = distance
-            processed << track if (time_diff < 7200 && speed < 40)
+              track["time_diff"] = time_diff
+              track["speed"] = speed
+              track["distance"] = distance
+              processed << track if (time_diff < 7200 && time_diff > 0 && speed < 40)
+            end
           end
-        end
       end
       processed
     end

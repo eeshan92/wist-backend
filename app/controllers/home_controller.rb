@@ -45,18 +45,20 @@ class HomeController < ApplicationController
 
       processed = []
       (data || {}).map do |user, tracks|
-        tracks.each_with_index do |track, index|
-          if index > 0
-            distance = calc_distance(track, tracks[index - 1])
-            time_diff = track["time"] - tracks[index - 1]["time"]
-            speed = (time_diff == 0 ? 999 : distance/time_diff)
+        tracks = tracks.sort { |a,b| a['id'] <=> b['id'] }
+        tracks.
+          each_with_index do |track, index|
+            if index > 0
+              distance = calc_distance(track, tracks[index - 1])
+              time_diff = track["time"] - tracks[index - 1]["time"]
+              speed = (time_diff == 0 ? 999 : distance/time_diff)
 
-            track["time_diff"] = time_diff
-            track["speed"] = speed
-            track["distance"] = distance
-            processed << track if (time_diff < 7200 && speed < 40)
+              track["time_diff"] = time_diff
+              track["speed"] = speed
+              track["distance"] = distance
+              processed << track if (time_diff < 7200 && time_diff > 0 && speed < 40)
+            end
           end
-        end
       end
       processed
     end
