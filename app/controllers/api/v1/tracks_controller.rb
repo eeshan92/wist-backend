@@ -10,7 +10,7 @@ class Api::V1::TracksController < Api::V1::BaseController
   end
 
   def create
-    @track = current_user.tracks.build({"track_time" => (params[:track_time] || Time.now).to_time})
+    @track = current_user.tracks.build({"track_time" => get_track_time})
     if params[:lat].present? && params[:lng].present?
       lat = to_decimal(params[:lat])
       lng = to_decimal(params[:lng])
@@ -96,5 +96,13 @@ class Api::V1::TracksController < Api::V1::BaseController
       c = 2 * Math::atan2(Math::sqrt(a), Math::sqrt(1-a))
 
       rm * c # Delta in metres
+    end
+
+    def get_track_time
+      if params[:track_time].present?
+        params[:track_time].to_time - 8.hours
+      else
+        Time.now
+      end
     end
 end
