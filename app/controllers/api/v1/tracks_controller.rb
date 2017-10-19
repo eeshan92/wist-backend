@@ -24,6 +24,7 @@ class Api::V1::TracksController < Api::V1::BaseController
 
     if @track.save
       render json: { id: @track.id }, status: :ok
+      record_trip
     else
       render json: { errors: @track.errors }, status: :unprocessable_entity
     end
@@ -104,5 +105,18 @@ class Api::V1::TracksController < Api::V1::BaseController
       else
         Time.now
       end
+    end
+
+    def record_trip
+      last_track = Track.last_user_track(current_user)
+      time_diff = @track.track_time - last_track.track_time if last_track.present?
+      current_trip = if time_diff.present? && time_diff > 3600
+                       current_user.end_last_trip
+                       Trip.create(user: current_user, start_time: @track.track_time)
+                     else
+                       current_user.last_trip
+                     end
+      @track.trip = current_trip
+      @track.save!
     end
 end

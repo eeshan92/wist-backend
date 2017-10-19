@@ -7,6 +7,15 @@ class User < ApplicationRecord
 
   has_many :posts
   has_many :tracks
+  has_many :trips
 
   validates :username, presence: true
+
+  def last_trip
+    self.trips.last
+  end
+
+  def end_last_trip
+    last_trip.end_trip if last_trip.present?
+  end
 end

@@ -6,6 +6,7 @@ class Trip < ApplicationRecord
 
   def end_trip
     self.end_time = last_track_time
+    self.save!
   end
 
   def last_track_time
