@@ -44,7 +44,7 @@ function initMap() {
       position: { lat: track['location']['lat'] * 1, lng: track['location']['lng'] * 1 },
       map: map,
       opacity: 0.25,
-      title: track["created_at"],
+      title: track["track_time"],
       label: track["user_id"] + ""
     });
     markers.push(_marker);
