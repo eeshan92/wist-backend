@@ -6,10 +6,15 @@ class HomeController < ApplicationController
 
     track_day = (params[:date] || Time.now.in_time_zone("Singapore")).to_date
     @current_date = track_day
-    @tracks = Track.includes(:location).
-              where("DATE(created_at AT TIME ZONE 'UTC' AT TIME ZONE ?) = ?",
-                Time.now.in_time_zone("Singapore").strftime("%Z"), track_day)
-    @tracks = @tracks.where(user_id: params[:id]) if params[:id].present?
+    # @tracks = Track.includes(:location).
+    #           where("DATE(created_at AT TIME ZONE 'UTC' AT TIME ZONE ?) = ?",
+    #             Time.now.in_time_zone("Singapore").strftime("%Z"), track_day)
+    @trip = if params[:trip].present?
+              Trip.where("id = ?", params[:trip]).first
+            else
+              Trip.last
+            end
+    @tracks = @trip.tracks
     gon.watch.tracks = @tracks.as_json(include: [:location])
 
     respond_to do |format|
