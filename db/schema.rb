@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170927110046) do
+ActiveRecord::Schema.define(version: 20171019094328) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -32,14 +32,36 @@ ActiveRecord::Schema.define(version: 20170927110046) do
     t.index ["user_id"], name: "index_posts_on_user_id", using: :btree
   end
 
+  create_table "track_point", id: :bigint, default: -> { "nextval('track_point_sampleid_seq'::regclass)" }, force: :cascade do |t|
+    t.float    "lat"
+    t.float    "lng"
+    t.float    "distance"
+    t.float    "time_diff"
+    t.text     "user"
+    t.float    "speed"
+    t.datetime "time"
+  end
+
   create_table "tracks", force: :cascade do |t|
     t.integer  "user_id"
     t.integer  "location_id"
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
     t.datetime "track_time"
+    t.integer  "trip_id"
     t.index ["location_id"], name: "index_tracks_on_location_id", using: :btree
+    t.index ["trip_id"], name: "index_tracks_on_trip_id", using: :btree
     t.index ["user_id"], name: "index_tracks_on_user_id", using: :btree
+  end
+
+  create_table "trips", force: :cascade do |t|
+    t.integer  "type"
+    t.datetime "start_time"
+    t.datetime "end_time"
+    t.integer  "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_trips_on_user_id", using: :btree
   end
 
   create_table "users", force: :cascade do |t|
@@ -65,5 +87,6 @@ ActiveRecord::Schema.define(version: 20170927110046) do
 
   add_foreign_key "posts", "users"
   add_foreign_key "tracks", "locations"
+  add_foreign_key "tracks", "trips"
   add_foreign_key "tracks", "users"
 end
