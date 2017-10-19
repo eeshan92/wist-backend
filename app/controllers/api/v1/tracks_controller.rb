@@ -111,7 +111,7 @@ class Api::V1::TracksController < Api::V1::BaseController
       last_track = Track.last_user_track(current_user)
       time_diff = @track.track_time - last_track.track_time if last_track.present?
       current_trip = if time_diff.present? && time_diff > 3600
-                       current_user.end_last_trip
+                       last_track.trip.end_trip
                        Trip.create(user: current_user, start_time: @track.track_time)
                      else
                        current_user.last_trip
