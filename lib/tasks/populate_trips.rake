@@ -29,7 +29,7 @@ namespace :trips do
           record_trip(track, user)
         end
       end
-      user.trips.last.end_trip
+      user.trips.each { |trip| trip.end_trip }
     end
 
     total_added_trips = Trip.count - current_trip_count
