@@ -61,7 +61,7 @@ class HomeController < ApplicationController
               track["time_diff"] = time_diff
               track["speed"] = speed
               track["distance"] = distance
-              processed << track if (time_diff < 7200 && time_diff > 0 && speed < 40)
+              processed << track if (time_diff < 7200 && time_diff > 0 && speed < 60)
             end
           end
       end
