@@ -10,11 +10,11 @@ class HomeController < ApplicationController
     #           where("DATE(created_at AT TIME ZONE 'UTC' AT TIME ZONE ?) = ?",
     #             Time.now.in_time_zone("Singapore").strftime("%Z"), track_day)
     @trip = if params[:trip].present?
-              Trip.where("id = ?", params[:trip]).first
+              Trip.includes(:tracks, :user).where("id = ?", params[:trip]).first
             else
-              Trip.last
+              Trip.includes(:tracks, :user).last
             end
-    @tracks = @trip.tracks
+    @tracks = Track.includes(:location).where(trip: @trip).order("track_time asc")
     gon.watch.tracks = @tracks.as_json(include: [:location])
 
     respond_to do |format|

@@ -40,37 +40,57 @@ function initMap() {
   });
 
   function addMarker(track) {
+    position = tracks.indexOf(track);
+    length = tracks.length;
     var _marker = new google.maps.Marker({
       position: { lat: track['location']['lat'] * 1, lng: track['location']['lng'] * 1 },
       map: map,
-      opacity: 0.25,
+      opacity: ((position + 1.0)/length),
       title: track["track_time"],
-      label: track["user_id"] + ""
+      label: position.toString()
     });
     markers.push(_marker);
     _marker.addListener("click", function() {
-      console.log(_marker.getLabel() + "\n" + _marker.getTitle());
+      console.log("ID: "+ track["id"] + "\n" + track["track_time"]);
     });
   };
 
   // Set Opacity to 1.0 when time line matches track
-  $("#track_time_range").change(function() {
-    var time = new Date(today + (this.value * 60000));
-    _.each(markers, function (marker_track) {
-      var created = new Date(marker_track.getTitle());
-      if (Math.abs((created - time)/60000) <= 20.0) 
-        emphasizeMarker(marker_track);
-      else
-        unemphasizeMarker(marker_track);
+  // $("#track_time_range").change(function() {
+  //   var time = new Date(today + (this.value * 60000));
+  //   _.each(markers, function (marker_track) {
+  //     var created = new Date(marker_track.getTitle());
+  //     if (Math.abs((created - time)/60000) <= 20.0)
+  //       emphasizeMarker(marker_track);
+  //     else
+  //       unemphasizeMarker(marker_track);
+  //   });
+  // });
+
+  // function emphasizeMarker(now_marker) {
+  //   now_marker.setOpacity(1.0);
+  // };
+
+  // function unemphasizeMarker(now_marker) {
+  //   now_marker.setOpacity(0.25);
+  // };
+
+  $(".trip_click").on("click", function() {
+    trip_id = $(this).val();
+    gon.watch("tracks", { method: "get", url: "/?trip=" + trip_id }, function(new_tracks) {
+      clearCurrentTracks();
+      tracks = new_tracks;
+      _.each(tracks, function (track) {
+        addMarker(track);
+      });
+      console.log("User: " + tracks[0]["user_id"] + "\nTrip: " + trip_id + "\nTrack count: " + new_tracks.length);
     });
   });
 
-  function emphasizeMarker(now_marker) {
-    now_marker.setOpacity(1.0);
-  };
-
-  function unemphasizeMarker(now_marker) {
-    now_marker.setOpacity(0.25);
+  function clearCurrentTracks() {
+    _.each(markers, function(marker) {
+      marker.setMap(null);
+    });
   };
 
   // // Limit zoom on map view

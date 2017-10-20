@@ -20,16 +20,14 @@
         <b>Trip start:</b>
         <%= @trip.start_time %>
       </div>
+
       <div>
         <b>Trip end:</b>
         <%= @trip.end_time %>
       </div>
-      <%= form_tag("/", method: "get") do %>
-        <%= label_tag(:trip, "Trip") %>
-        <%= select_tag(:trip,
-                       # value: @trip.id,
-                       options_for_select(Trip.includes(:tracks).map { |t| ["#{t.id} (#{t.tracks.count})", t.id]})) %>
-        <%= submit_tag("Change", class: "btn btn-primary") %>
+
+      <% Trip.includes(:tracks, :user).map do |trip| %>
+        <input type="button" value=<%= trip.id %> class="trip_click btn btn-primary">
       <% end %>
     </div>
     <div class="col-lg-8">
